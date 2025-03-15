@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List Home</title>
+    <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <div class="profile-section">
+            <div class="profile-photo" onclick="openSettings()">
+                <img id="profileImage" src="images/profile.jpg" alt="Profile Photo">
+            </div>
+            <span id="username"></span>
+        </div>
+        <h1>Welcome, <span id="welcomeUsername">User</span>!</h1>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar (Left) -->
+        <aside class="sidebar">
+            <ul>
+                <li onclick="fetchTasks()">📋 My Tasks</li>
+                <li onclick="openAddTaskPopup()">➕ Add Task</li>
+                <li onclick="navigateTo('completed-tasks')">✔ Completed Tasks</li>
+                <li onclick="navigateTo('high-priority')">🔥 High Priority Tasks</li>
+                <li onclick="navigateTo('today-tasks')">📅 Today's Tasks</li>
+            </ul>
+        </aside>
+
+        <!-- Main Content (Right) -->
+        <main class="main-content" id="taskDisplay">
+            <h2  id="tasks-heading"class="your-tasks">Your Tasks</h2>
+            <button class="add-task-btn" onclick="openAddTaskPopup()">+ Add Task</button>
+            <div class="task-grid" id="taskList">
+                <p>Loading tasks...</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Update Task Popup -->
+    <div id="updateTaskPopup" class="popup">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closeUpdateTaskPopup()">&times;</span>
+            <h2>Update Task</h2>
+            <form id="updateTaskForm">
+                <input type="hidden" id="updateTaskId" name="id">
+                <div class="input-group">
+                    <label for="updateTaskTitle">Title</label>
+                    <input type="text" id="updateTaskTitle" name="title" required>
+                </div>
+                <div class="input-group">
+                    <label for="updateTaskDescription">Description</label>
+                    <textarea id="updateTaskDescription" name="description" required></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="updateTaskDueDate">Due Date</label>
+                    <input type="datetime-local" id="updateTaskDueDate" name="dueDate" required>
+                </div>
+                <div class="input-group">
+                    <label for="updateTaskPriority">Priority</label>
+                    <select id="updateTaskPriority" name="priority" required>
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="updateTaskStatus">Status</label>
+                    <select id="updateTaskStatus" name="status" required>
+                        <option value="PENDING">Pending</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="COMPLETED">Completed</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="updateTaskReminder">Reminder</label>
+                    <input type="datetime-local" id="updateTaskReminder" name="reminder">
+                </div>
+                <div class="input-group">
+                    <label for="updateTaskAttachments">Attachments</label>
+                    <input type="text" id="updateTaskAttachments" name="attachments">
+                </div>
+                <button type="submit" class="submit-btn">Update Task</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Task Popup -->
+    <div id="addTaskPopup" class="popup">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closeAddTaskPopup()">&times;</span>
+            <h2>Add New Task</h2>
+            <form id="addTaskForm">
+                <div class="input-group">
+                    <label for="taskTitle">Title</label>
+                    <input type="text" id="taskTitle" name="title" required>
+                </div>
+                <div class="input-group">
+                    <label for="taskDescription">Description</label>
+                    <textarea id="taskDescription" name="description" required></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="taskDueDate">Due Date</label>
+                    <input type="datetime-local" id="taskDueDate" name="dueDate" required>
+                </div>
+                <div class="input-group">
+                    <label for="taskPriority">Priority</label>
+                    <select id="taskPriority" name="priority" required>
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="taskStatus">Status</label>
+                    <select id="taskStatus" name="status" required>
+                        <option value="PENDING">Pending</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="COMPLETED">Completed</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="taskReminder">Reminder</label>
+                    <input type="datetime-local" id="taskReminder" name="reminder">
+                </div>
+                <div class="input-group">
+                    <label for="taskAttachments">Attachments</label>
+                    <input type="url" id="taskAttachments" name="attachments">
+                </div>
+                <button type="submit" class="submit-btn">Add Task</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer>
+        <div class="footer-left">
+            <button class="settings-btn" onclick="openSettings()">
+                <i class="fas fa-cog"></i>
+            </button>
+            <button class="login-btn" onclick="openLoginpage()">Login</button>
+        </div>
+        <div class="footer-center">
+            <p>&copy; 2025 Copyrights </p>
+        </div>
+    </footer>
+
+    <!-- Settings Popup -->
+    <!-- Settings Popup -->
+<div id="settingsPopup" class="popup">
+    <div class="popup-content">
+        <span class="close-btn" onclick="closeSettings()">&times;</span>
+        <div class="profile-photo-popup">
+            <img id="profileImagePopup" src="images/profileimg.png" alt="Profile Photo">
+        </div>
+        <p id="popupUsername">User</p>
+
+        <!-- Change Profile Picture Section -->
+        <div class="input-group">
+            <p>Do you want to change your profile picture?</p>
+            <div class="input-wrapper">
+                <input type="file" id="profilePictureInput" accept="image/*" style="display: none;">
+                <button id="Choose-file-btn" onclick="document.getElementById('profilePictureInput').click()">Choose File</button>
+                <button class="submit-btn" onclick="uploadProfilePicture()">Upload</button>
+            </div>
+        </div>
+
+        <!-- Change Username Section -->
+        <div class="input-group">
+            <p>Do you want to change your username?</p>
+            <div class="input-wrapper">
+                <input type="text" id="newUsernameInput" placeholder="Enter new username">
+                <button class="submit-btn" onclick="changeUsername()">Submit</button>
+            </div>
+        </div>
+
+        <!-- Change Password Section -->
+        <div class="input-group">
+            <p>Do you want to change your password?</p>
+            <div class="input-wrapper">
+                <input type="password" id="newPasswordInput" placeholder="Enter new password">
+                <button class="submit-btn" onclick="changePassword()">Submit</button>
+            </div>
+        </div>
+
+        <!-- Logout Button -->
+        <button onclick="logout()" class="logout-btn">Logout</button>
+    </div>
+</div>
+
+    <script src="home.js"></script>
+</body>
+</html>
