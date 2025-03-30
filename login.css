@@ -1,70 +1,179 @@
-body {
+/* Reset Default Styles */
+* {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    overflow: hidden;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
 
+/* Animated Gradient Background */
+.background {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(-45deg, #ffdde1, #fad0c4, #fbc2eb, #a18cd1);
+    background-size: 400% 400%;
+    animation: gradientAnimation 6s ease infinite;
+}
+
+/* Gradient Animation */
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Login Card Container */
 .login-container {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.2);
+    padding: 35px;
+    border-radius: 15px;
     text-align: center;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    width: 360px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Card Hover Effect */
+.login-container:hover {
+    transform: translate(-50%, -50%) scale(1.03);
+}
+
+/* Heading */
+h2 {
+    color: #ff4f8b;
+    font-size: 26px;
+    margin-bottom: 15px;
     animation: fadeIn 1s ease-in-out;
 }
 
-h2 {
-    color: white;
-    font-size: 24px;
+/* Input Box */
+.input-box {
+    position: relative;
+    margin: 15px 0;
 }
 
-input {
-    width: 90%;
-    padding: 10px;
-    margin: 10px 0;
+.input-box input {
+    width: 100%;
+    padding: 12px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    font-size: 16px;
+    color: #333;
     outline: none;
-}
-
-button {
-    background: #ff7eb3;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    color: white;
-    cursor: pointer;
     transition: 0.3s;
 }
 
-button:hover {
-    background: #ff4f8b;
+/* Floating Placeholder */
+.input-box label {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: rgba(0, 0, 0, 0.5);
+    transition: 0.3s ease-in-out;
+    font-size: 14px;
 }
 
-p a {
-    color: #ffcccb;
+/* Move Label on Focus */
+.input-box input:focus + label,
+.input-box input:valid + label {
+    top: 5px;
+    font-size: 12px;
+    color: #ff4f8b;
+}
+
+/* Animated Button */
+.login-btn {
+    background: #ff7eb3;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+    width: 100%;
+    font-weight: bold;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Button Hover Effect */
+.login-btn:hover {
+    background: #ff4f8b;
+    transform: scale(1.05);
+}
+
+/* Extra Links */
+.extra-links p {
+    font-size: 14px;
+    color: white;
+}
+
+.extra-links a {
+    color: #ff4f8b;
     text-decoration: none;
     font-weight: bold;
 }
 
-p a:hover {
+.extra-links a:hover {
     text-decoration: underline;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* OR Text */
+.or-text {
+    color: white;
+    margin: 10px 0;
+    font-weight: bold;
+    font-size: 14px;
 }
+
+/* Google Sign-In Button */
+.g_id_signin {
+    margin-top: 10px;
+    transform: scale(1.1);
+    transition: transform 0.3s ease-in-out;
+}
+
+.g_id_signin:hover {
+    transform: scale(1.15);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Extra Links Section */
+.extra-links {
+    display: flex;
+    flex-direction: column; /* Places each line in a new row */
+    align-items: center;
+    gap: 10px; /* Adds space between "Sign up" and "Reset Password" */
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.extra-links p {
+    font-size: 14px;
+    color: white;
+    margin: 0;
+}
+
+.extra-links a {
+    color: #ff4f8b;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.extra-links a:hover {
+    text-decoration: underline;
+}
+

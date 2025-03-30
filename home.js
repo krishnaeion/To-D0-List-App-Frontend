@@ -1,9 +1,25 @@
 let tasks = []; // Global variable to store tasks
-console.log(tasks);
+// console.log(tasks);
 
 document.getElementById('username').textContent = localStorage.getItem('username') || 'User';
 document.getElementById('popupUsername').textContent = localStorage.getItem('username') || 'User';
 document.getElementById('welcomeUsername').textContent = localStorage.getItem('username') || 'User';
+
+// const now1 = new Date();
+// console.log(now1);
+
+
+// const now = new Date(); // Current date and time
+// const dueDate = new Date("2025-03-19T23:59:00"); // Given due date
+// console.log("now :", now);
+// console.log("dueDate: ",dueDate);
+
+// // Convert both to ISO string format for comparison
+// const formattedNow = now.toISOString().split('.')[0]; // Remove milliseconds
+// const formattedDueDate = dueDate.toISOString().split('.')[0];
+
+// console.log("Now:", formattedNow); // 2025-03-27T03:23:06
+// console.log("Due Date:", formattedDueDate); // 2025-03-19T23:59:00
 
 // Fetch and display tasks
 async function fetchTasks() {
@@ -13,7 +29,7 @@ async function fetchTasks() {
         document.getElementById('taskList').innerHTML = '<p>Please log in to see your tasks.</p>';
         return;
     }
-
+    
     try {
         const response = await fetch('http://localhost:8080/home', {
             method: 'GET',
@@ -34,6 +50,7 @@ async function fetchTasks() {
         }
 
         tasks = await response.json(); // Store tasks in the global variable
+        console.log(tasks);
         displayTasks(tasks);
     } catch (error) {
         document.getElementById('taskList').innerHTML = '<p>Error fetching tasks. Please try again later.</p>';
@@ -148,6 +165,30 @@ async function fetchTodayTasks() {
     }
 }
 
+
+const search = document.getElementById('searchBar');
+
+// Listen for input event on the search bar
+search.addEventListener("input", (e) => {
+    const value = e.target.value.toLowerCase(); // Convert input to lowercase for case-insensitive search
+
+    // Filter tasks based on the title
+    const filteredTasks = tasks.filter(task => 
+        task.title.toLowerCase().includes(value)
+    );
+
+    // Display only the filtered tasks
+    displayTasks(filteredTasks);
+
+    // If search is cleared, show all tasks again
+    if (value === "") {
+        displayTasks(tasks);
+    }
+});
+
+
+
+
 // Display tasks in grid format
 function displayTasks(tasks) {
     const taskList = document.getElementById('taskList');
@@ -169,24 +210,41 @@ function displayTasks(tasks) {
         return;
     }
 
+
+
     tasks.forEach(task => {
         const taskCard = document.createElement('div');
         taskCard.classList.add('task-card');
+        const attachmentLink = convertToDirectGoogleDriveLink(task.attachments);
+
         taskCard.innerHTML = `
             <h3>${task.title}</h3>
             <p><strong>Description:</strong> ${task.description}</p>
             <p><strong>Due Date:</strong> ${new Date(task.dueDate).toLocaleDateString()}</p>
             <p><strong>Priority:</strong> <span class="priority-${task.priority.toLowerCase()}">${task.priority}</span></p>
             <p><strong>Status:</strong> <span class="status-${task.status.toLowerCase().replace(' ', '-')}">${getStatusEmoji(task.status)}</span></p>
-            <p><strong>Attachments:</strong> <a href="${task.attachments}" download>Download</a></p>
+            <p><strong>Attachments:</strong> <a href="${attachmentLink}" download>Download</a></p>
             <div class="task-actions">
                 <button onclick="updateTask('${task.id}')"><i class="fas fa-pencil-alt"></i></button>
                 <button onclick="deleteTask('${task.id}')"><i class="fas fa-trash"></i></button>
             </div>
         `;
         taskList.appendChild(taskCard);
+        console.log(task.dueDate);
     });
 }
+
+// it will covert the google drive link to dowload file
+function convertToDirectGoogleDriveLink(url) {
+    const driveRegex = /https:\/\/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)([a-zA-Z0-9_-]+)/;
+    const match = url.match(driveRegex);
+
+    if (match && match[1]) {
+        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+    }
+    return url; // If it's not a Google Drive link, return the original URL
+}
+
 
 // Helper function to get status emoji
 function getStatusEmoji(status) {
@@ -197,6 +255,9 @@ function getStatusEmoji(status) {
         default: return '';
     }
 }
+
+
+
 
 // Open settings popup
 function openSettings() {
@@ -317,12 +378,20 @@ function logout() {
     window.location.href = 'login.html';
 }
 
+
 function openLoginpage(){
    if(tasks.length==0){
     window.location.href = 'login.html';
-   }
-      
+   }     
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const loginButton = document.getElementById('loginButton');
+    if (loginButton && localStorage.getItem('jwtToken')) {
+        loginButton.style.display = 'none';
+    }
+});
+
 
 // Open Add Task Popup
 function openAddTaskPopup() {
@@ -347,6 +416,12 @@ document.getElementById('addTaskForm').addEventListener('submit', async (event) 
         reminder: document.getElementById('taskReminder').value + ':00', // Add seconds
         attachments: document.getElementById('taskAttachments').value,
     };
+
+     // ✅ Validate attachment (Google Drive & Dropbox only)
+     if (taskData.attachments && !isValidAttachmentLink(taskData.attachments)) {
+        alert('Invalid attachment URL! Please enter a valid Google Drive or Dropbox link.');
+        return;
+    }
 
     try {
         const token = localStorage.getItem('jwtToken');
@@ -376,6 +451,13 @@ document.getElementById('addTaskForm').addEventListener('submit', async (event) 
         alert('Error adding task. Please try again.');
     }
 });
+
+function isValidAttachmentLink(url) {
+    const googleDrivePattern = /^https?:\/\/drive\.google\.com\/(file\/d\/|open\?id=)[\w-]+/;
+    const dropboxPattern = /^https?:\/\/(www\.)?dropbox\.com\/s\/[\w\d]+\/.+/;
+    return googleDrivePattern.test(url) || dropboxPattern.test(url);
+}
+
 
 // Update the "Add Task" button to open the popup
 document.querySelector('.add-task-btn').addEventListener('click', openAddTaskPopup);
@@ -459,8 +541,14 @@ document.getElementById('updateTaskForm').addEventListener('submit', async (even
         priority: document.getElementById('updateTaskPriority').value,
         status: document.getElementById('updateTaskStatus').value,
         reminder: document.getElementById('updateTaskReminder').value + ':00', // Add seconds
-        attachments: document.getElementById('updateTaskAttachments').value,
+        attachments: document.getElementById('updateTaskAttachments').value.trim(),
     };
+
+    // ✅ Validate attachment (Google Drive & Dropbox only)
+    if (taskData.attachments && !isValidAttachmentLink(taskData.attachments)) {
+        alert('Invalid attachment URL! Please enter a valid Google Drive or Dropbox link.');
+        return;
+    }
 
     try {
         const token = localStorage.getItem('jwtToken');
@@ -490,6 +578,134 @@ document.getElementById('updateTaskForm').addEventListener('submit', async (even
         alert('Error updating task. Please try again.');
     }
 });
+
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', async function () {
+    await fetchTasks(); 
+    checkOverdueTasks(); 
+});
+
+let overdueTasksQueue = []; // Store overdue tasks
+
+document.addEventListener('DOMContentLoaded', async function () {
+    await fetchTasks(); // Wait for tasks to load
+    checkOverdueTasks();
+});
+
+function checkOverdueTasks() {
+    const now = new Date().toISOString().split('.')[0]; 
+    const nowDate = new Date(now);
+
+    overdueTasksQueue = tasks.filter(task => 
+        new Date(task.dueDate) < nowDate && task.status !== "COMPLETED"
+    );
+
+    console.log("Overdue tasks:", overdueTasksQueue);
+
+    if (overdueTasksQueue.length > 0) {
+        showNextOverdueTask();
+    }
+}
+
+function showNextOverdueTask() {
+    if (overdueTasksQueue.length === 0) return;
+
+    const task = overdueTasksQueue[0]; // Get the first overdue task
+
+    document.getElementById("overdueTaskMessage").innerText = 
+        `Task "${task.title}" is overdue! What do you want to do?`;
+
+    document.getElementById("taskOverduePopup").style.display = "flex"; // Show popup
+}
+
+// Handle user action for the current task
+function handleTaskAction(action) {
+    console.log("action :", action);
+    if (overdueTasksQueue.length === 0) return;
+
+    const task = overdueTasksQueue.shift(); // Remove the first task
+
+    if (action === "completed") {
+        console.log("action :", action);
+        updateTaskStatus(task.id, "COMPLETED");
+    } else if (action === "extend") {
+        extendDueDate(task.id);
+    } else if (action === "delete") {
+        deleteTask(task.id);
+    }
+
+    if (overdueTasksQueue.length > 0) {
+        showNextOverdueTask(); // Show the next task
+    } else {
+        closePopup(); // Close popup when all tasks are handled
+    }
+}
+
+// Update task status to "Completed"
+function updateTaskStatus(taskId, status) {
+    fetch(`http://localhost:8080/home/update/${taskId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(() => {
+        alert('Task updated successfully!');
+        fetchTasks(); // Refresh task list
+    })
+    .catch(error => console.error('Error updating task:', error));
+}
+
+// Extend the due date by 1 day
+function extendDueDate(taskId) {
+    const updatedDueDate = new Date();
+    updatedDueDate.setDate(updatedDueDate.getDate() + 1);
+
+    fetch(`http://localhost:8080/home/update/date/${taskId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ dueDate: updatedDueDate.toISOString().split('T')[0] })
+    })
+    .then(response => response.json())
+    .then(() => {
+        alert('Due date extended by 1 day!');
+        fetchTasks();
+    })
+    .catch(error => console.error('Error updating task:', error));
+}
+
+
+function closePopup() {
+    document.getElementById("taskOverduePopup").style.display = "none";
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 let selectedFile = null; // Variable to store the selected file
@@ -552,6 +768,23 @@ function uploadProfilePicture() {
         alert('Error uploading profile picture.');
     });
 }
+
+// Open Profile Picture Popup
+function openProfilePopup() {
+    const profileImage = document.getElementById("profileImage");
+    const popupProfileImage = document.getElementById("popupProfileImage");
+    const profilePopup = document.getElementById("profilePopup");
+
+    popupProfileImage.src = profileImage.src; // Set the image source
+    profilePopup.classList.add("show"); // Show the popup with transition
+}
+
+// Close Profile Picture Popup
+function closeProfilePopup() {
+    document.getElementById("profilePopup").classList.remove("show");
+}
+
+
 
 // Fetch and Display Profile Picture
 function fetchProfilePicture() {
